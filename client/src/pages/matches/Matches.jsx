@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Sparkles,
   ArrowRight,
@@ -11,7 +11,8 @@ import {
   MapPin,
   AlertTriangle,
   Camera,
-  ImageOff
+  ImageOff,
+  MessageSquare
 } from 'lucide-react';
 import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
@@ -22,6 +23,7 @@ export default function Matches() {
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchMatches = async () => {
@@ -43,6 +45,25 @@ export default function Matches() {
       await api.put(`/matches/${matchId}/dismiss`);
       setMatches((prev) => prev.filter((m) => m._id !== matchId));
       toast.success('Match dismissed');
+    } catch (err) {
+      toast.error(err.message);
+    }
+  };
+
+  // Works from EITHER side of the match: if you own the lost item, this
+  // messages the found item's reporter, and vice versa — so both people
+  // can start talking before any claim is ever submitted.
+  const handleMessage = async (otherItem) => {
+    if (!otherItem?.user?._id) {
+      toast.error('Could not find that reporter');
+      return;
+    }
+    try {
+      const res = await api.post('/conversations', {
+        recipientId: otherItem.user._id,
+        itemId: otherItem._id,
+      });
+      navigate(`/messages/${res.data._id}`);
     } catch (err) {
       toast.error(err.message);
     }
@@ -82,6 +103,13 @@ export default function Matches() {
             const lost = m.lostItem;
             const found = m.foundItem;
             if (!lost || !found) return null;
+
+            // Whichever of the two items ISN'T yours is "their" side —
+            // that's who you'd message or claim against. This works
+            // correctly no matter which side of the match you're on.
+            const iOwnLost = lost.user?._id === user?._id;
+            const otherItem = iOwnLost ? found : lost;
+            const otherLabel = iOwnLost ? 'Found' : 'Lost';
 
             return (
               <div
@@ -210,13 +238,20 @@ export default function Matches() {
                 {/* Actions */}
                 <div className="flex flex-wrap items-center justify-end gap-3 pt-2">
                   <Link
-                    to={`/items/${found._id}`}
+                    to={`/items/${otherItem._id}`}
                     className="px-4 py-2 text-xs font-semibold rounded-xl border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800"
                   >
-                    Inspect Found Item
+                    Inspect {otherLabel} Item
                   </Link>
+                  <button
+                    onClick={() => handleMessage(otherItem)}
+                    className="px-4 py-2 text-xs font-semibold rounded-xl border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-1.5"
+                  >
+                    <MessageSquare className="w-3.5 h-3.5" />
+                    Message Reporter
+                  </button>
                   <Link
-                    to={`/items/${found._id}`}
+                    to={`/items/${otherItem._id}`}
                     className="px-5 py-2 text-xs font-semibold rounded-xl bg-brand-600 hover:bg-brand-700 text-white shadow-sm flex items-center gap-1.5"
                   >
                     <Shield className="w-3.5 h-3.5" />
