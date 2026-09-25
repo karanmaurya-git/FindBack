@@ -8,7 +8,8 @@ import {
   AlertTriangle,
   BarChart3,
   ArrowLeft,
-  Tags
+  Tags,
+  Package
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -22,6 +23,7 @@ export default function AdminLayout() {
   const links = [
     { name: 'Analytics & Overview', to: '/admin', icon: LayoutDashboard, end: true },
     { name: 'User Management', to: '/admin/users', icon: Users },
+    { name: 'Item Management', to: '/admin/items', icon: Package },
     { name: 'Reports & Flagged Content', to: '/admin/reports', icon: AlertTriangle },
     { name: 'Categories', to: '/admin/categories', icon: Tags },
   ];

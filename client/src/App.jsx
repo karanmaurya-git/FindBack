@@ -41,6 +41,7 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import UserManagement from './pages/admin/UserManagement';
 import ReportManagement from './pages/admin/ReportManagement';
 import CategoryManagement from './pages/admin/CategoryManagement';
+import ItemManagement from './pages/admin/ItemManagement';
 
 export default function App() {
   return (
@@ -156,6 +157,7 @@ export default function App() {
         >
           <Route index element={<AdminDashboard />} />
           <Route path="users" element={<UserManagement />} />
+          <Route path="items" element={<ItemManagement />} />
           <Route path="reports" element={<ReportManagement />} />
           <Route path="categories" element={<CategoryManagement />} />
         </Route>
@@ -177,3 +179,4 @@ export default function App() {
     </Routes>
   );
 }
+
