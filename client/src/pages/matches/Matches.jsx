@@ -250,13 +250,18 @@ export default function Matches() {
                     <MessageSquare className="w-3.5 h-3.5" />
                     Message Reporter
                   </button>
-                  <Link
-                    to={`/items/${otherItem._id}`}
-                    className="px-5 py-2 text-xs font-semibold rounded-xl bg-brand-600 hover:bg-brand-700 text-white shadow-sm flex items-center gap-1.5"
-                  >
-                    <Shield className="w-3.5 h-3.5" />
-                    Verify Ownership & Claim
-                  </Link>
+                  {/* Only claimable when the OTHER item is a Found item —
+                      if you own the Found item, there's nothing to claim
+                      on the matching Lost report, so only messaging applies. */}
+                  {iOwnLost && (
+                    <Link
+                      to={`/items/${otherItem._id}`}
+                      className="px-5 py-2 text-xs font-semibold rounded-xl bg-brand-600 hover:bg-brand-700 text-white shadow-sm flex items-center gap-1.5"
+                    >
+                      <Shield className="w-3.5 h-3.5" />
+                      Verify Ownership & Claim
+                    </Link>
+                  )}
                 </div>
               </div>
             );

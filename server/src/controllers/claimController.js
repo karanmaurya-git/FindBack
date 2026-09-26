@@ -20,6 +20,17 @@ exports.submitClaim = async (req, res, next) => {
       return next(ApiError.badRequest('You cannot submit a claim on your own report'));
     }
 
+    // Only Found items can be claimed. A Lost item report has nothing in
+    // anyone's possession to hand over — if you found something matching
+    // someone's lost report, message them instead of "claiming" it.
+    if (item.type !== 'found') {
+      return next(
+        ApiError.badRequest(
+          'You can only submit an ownership claim on a Found item. This is a Lost item report — message the reporter directly if you believe you found their item.'
+        )
+      );
+    }
+
     if (item.status === 'returned' || item.status === 'closed') {
       return next(ApiError.badRequest('This item has already been marked as returned or closed'));
     }

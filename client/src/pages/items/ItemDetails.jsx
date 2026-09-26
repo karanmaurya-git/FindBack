@@ -329,15 +329,20 @@ export default function ItemDetails() {
           {/* Action Buttons */}
           <div className="pt-4 border-t border-slate-100 dark:border-slate-800 space-y-3">
             {!isOwner ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <button
-                  onClick={() => setClaimModalOpen(true)}
-                  disabled={item.status === 'returned' || item.status === 'closed'}
-                  className="py-3 px-4 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-sm shadow-md shadow-brand-500/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-                >
-                  <Shield className="w-4 h-4" />
-                  I Think This Is Mine
-                </button>
+              <div className={`grid grid-cols-1 ${!isLost ? 'sm:grid-cols-2' : ''} gap-3`}>
+                {/* Only Found items can be claimed — there's nothing to
+                    hand over on a Lost item report, so claiming one makes
+                    no sense. In that case, messaging is the only action. */}
+                {!isLost && (
+                  <button
+                    onClick={() => setClaimModalOpen(true)}
+                    disabled={item.status === 'returned' || item.status === 'closed'}
+                    className="py-3 px-4 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-sm shadow-md shadow-brand-500/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                  >
+                    <Shield className="w-4 h-4" />
+                    I Think This Is Mine
+                  </button>
+                )}
 
                 <button
                   onClick={handleStartChat}
