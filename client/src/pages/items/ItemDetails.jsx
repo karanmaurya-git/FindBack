@@ -97,7 +97,7 @@ export default function ItemDetails() {
         recipientId: item.user._id,
         itemId: item._id,
       });
-      navigate(`/messages/${res.data._id}`);
+      navigate(`/messages/${res.data._id}`, { state: { conversation: res.data } });
     } catch (err) {
       toast.error(err.message);
     }

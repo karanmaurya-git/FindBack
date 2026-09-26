@@ -63,7 +63,7 @@ export default function Matches() {
         recipientId: otherItem.user._id,
         itemId: otherItem._id,
       });
-      navigate(`/messages/${res.data._id}`);
+      navigate(`/messages/${res.data._id}`, { state: { conversation: res.data } });
     } catch (err) {
       toast.error(err.message);
     }

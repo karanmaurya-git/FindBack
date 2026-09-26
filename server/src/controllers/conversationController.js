@@ -5,6 +5,11 @@ const ApiError = require('../utils/apiError');
 // Get all conversations for logged-in user
 exports.getConversations = async (req, res, next) => {
   try {
+    // This list changes every time a new conversation starts or a message
+    // arrives — it must never be served from a cached/304 response, or a
+    // freshly-created conversation can appear missing for a moment.
+    res.set('Cache-Control', 'no-store');
+
     const conversations = await Conversation.find({
       participants: req.user._id,
       isActive: true,

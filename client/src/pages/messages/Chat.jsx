@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import {
   Send,
   Image as ImageIcon,
@@ -9,7 +9,8 @@ import {
   Circle,
   Clock,
   CheckCheck,
-  Loader2
+  Loader2,
+  MessageSquareText
 } from 'lucide-react';
 import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
@@ -20,6 +21,7 @@ import toast from 'react-hot-toast';
 export default function Chat() {
   const { conversationId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
   const { socket, onlineUsers } = useSocket();
 
@@ -40,7 +42,17 @@ export default function Chat() {
     const fetchConversations = async () => {
       try {
         const res = await api.get('/conversations');
-        setConversations(res.data || []);
+        let list = res.data || [];
+
+        // If we just came from "Contact Reporter" / "Message Reporter" with
+        // a brand-new conversation, make sure it's in the list immediately —
+        // a cached response to this GET could otherwise miss it for a moment.
+        const freshConv = location.state?.conversation;
+        if (freshConv && !list.some((c) => c._id === freshConv._id)) {
+          list = [freshConv, ...list];
+        }
+
+        setConversations(list);
       } catch (err) {
         console.error(err);
       }
@@ -58,7 +70,12 @@ export default function Chat() {
       return;
     }
 
-    const conv = conversations.find((c) => c._id === conversationId);
+    // Use the freshly-created conversation instantly if it matches, rather
+    // than waiting for it to show up in the (possibly cached) list fetch.
+    const freshConv = location.state?.conversation;
+    const conv =
+      conversations.find((c) => c._id === conversationId) ||
+      (freshConv?._id === conversationId ? freshConv : null);
     setActiveConv(conv || null);
 
     const fetchMessages = async () => {
@@ -417,8 +434,14 @@ export default function Chat() {
               </form>
             </>
           ) : (
-            <div className="text-center p-8 text-slate-400 text-xs">
-              Select a conversation to start chatting
+            <div className="text-center p-8 max-w-xs">
+              <MessageSquareText className="w-10 h-10 text-slate-300 dark:text-slate-700 mx-auto mb-3" />
+              <p className="font-bold text-sm text-slate-600 dark:text-slate-300">
+                Select a conversation
+              </p>
+              <p className="text-xs text-slate-400 mt-1">
+                Choose someone from the list on the left to start chatting.
+              </p>
             </div>
           )}
         </div>
